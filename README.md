@@ -19,6 +19,7 @@ Commands:
 ·	!show_all: Shows all users' values. (Admin only)  
 ·	!show_value: Shows the value of the user who invoked the command via DM.  
 ·	!change_value_name <new_name>: Changes the name of the value (e.g., points, score). (Admin only) 
+· !show_value <user>
 
 Setup guide
 
