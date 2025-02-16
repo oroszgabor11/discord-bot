@@ -1,12 +1,3 @@
-#To run the code: python bot.py
-#To stop the bot: terminal Ctrl+C
-#bot token is in config.txt
-#Variable to store the value name
-#List of channel names where the bot will increment user values
-#List of channel names where the bot will accept commands
-#Replace 'Admin' with the required role name
-
-
 import discord
 from discord.ext import commands
 import json
@@ -39,23 +30,26 @@ def save_user_values():
     with open('user_values.json', 'w') as file:
         json.dump(user_values, file)
 
+# Variable to store the value name
+value_name = "value"
+
+# List of channel names where the bot will increment user values
+increment_channels = ["general", "chat", "discussion"]
+
+# List of channel names where the bot will accept commands
+command_channels = ["commands", "bot-commands"]
+
+# Variable to store the admin role name
+admin_role = "Admin"  # Replace 'Admin' with the required role name
+
 # Check if the user has the required role
 def has_role(ctx, role_name):
     role = discord.utils.get(ctx.guild.roles, name=role_name)
     return role in ctx.author.roles
 
-# Variable to store the value name
-value_name = "value"
-
-# List of channel names where the bot will increment user values
-increment_channels = ["general", "chat", "discussion"]  # Line with increment channels
-
-# List of channel names where the bot will accept commands
-command_channels = ["commands", "bot-commands"]  # Line with command channels
-
 # Command to add a user with a base value of 0
 @bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+@commands.has_role(admin_role)
 async def add_user(ctx, user: discord.Member):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
@@ -69,7 +63,7 @@ async def add_user(ctx, user: discord.Member):
 
 # Command to change a user's value
 @bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+@commands.has_role(admin_role)
 async def change_value(ctx, user: discord.Member, amount: int):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
@@ -86,24 +80,9 @@ async def change_value(ctx, user: discord.Member, amount: int):
     else:
         await ctx.send(f'User {user.name} does not exist.')
 
-# Command to show a specific user's value to an admin
-@bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
-async def show_value(ctx, user: discord.Member):
-    if ctx.channel.name not in command_channels:
-        await ctx.send(f'Commands are not allowed in this channel.')
-        return
-    user_id = str(user.id)
-    if user_id in user_values:
-        data = user_values[user_id]
-        custom_message = f'{user.name} has {data[value_name]} {value_name}. Last changed: {data["last_changed"]}'
-        await ctx.send(custom_message)
-    else:
-        await ctx.send(f'{user.name} does not have a value yet.')
-
 # Command to delete a user
 @bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+@commands.has_role(admin_role)
 async def delete_user(ctx, user: discord.Member):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
@@ -117,7 +96,7 @@ async def delete_user(ctx, user: discord.Member):
 
 # Command to change a user's name
 @bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+@commands.has_role(admin_role)
 async def change_name(ctx, user: discord.Member, new_name: str):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
@@ -131,7 +110,7 @@ async def change_name(ctx, user: discord.Member, new_name: str):
 
 # Command to show all users' values
 @bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+@commands.has_role(admin_role)
 async def show_all(ctx):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
@@ -142,12 +121,35 @@ async def show_all(ctx):
         message += f'{user.name}: {data[value_name]} (Last changed: {data["last_changed"]})\n'
     await ctx.send(message)
 
-# Command to show a user's value and DM them
+# Command to show a specific user's value to an admin
 @bot.command()
-async def show_value(ctx):
+@commands.has_role(admin_role)
+async def show_value(ctx, user: discord.Member):
     if ctx.channel.name not in command_channels:
         await ctx.send(f'Commands are not allowed in this channel.')
         return
+    user_id = str(user.id)
+    if user_id in user_values:
+        data = user_values[user_id]
+        custom_message = f'{user.name} has {data[value_name]} {value_name}. Last changed: {data["last_changed"]}'
+        await ctx.send(custom_message)
+    else:
+        await ctx.send(f'{user.name} does not have a value yet.')
+
+# Command to change the value name (e.g., points, score)
+@bot.command()
+@commands.has_role(admin_role)
+async def change_value_name(ctx, new_name: str):
+    if ctx.channel.name not in command_channels:
+        await ctx.send(f'Commands are not allowed in this channel.')
+        return
+    global value_name
+    value_name = new_name
+    await ctx.send(f'Value name changed to {new_name}.')
+
+# Command to show a user's value and DM them
+@bot.command()
+async def show_my_value(ctx):
     user_id = str(ctx.author.id)
     if user_id in user_values:
         data = user_values[user_id]
@@ -159,17 +161,6 @@ async def show_value(ctx):
             await ctx.send('I could not send you a DM. Please check your privacy settings.')
     else:
         await ctx.send('You do not have a value yet.')
-
-# Command to change the value name (e.g., points, score)
-@bot.command()
-@commands.has_role('Admin')  # Replace 'Admin' with the required role name
-async def change_value_name(ctx, new_name: str):
-    if ctx.channel.name not in command_channels:
-        await ctx.send(f'Commands are not allowed in this channel.')
-        return
-    global value_name
-    value_name = new_name
-    await ctx.send(f'Value name changed to {new_name}.')
 
 # Event to increment user's value when they send a message in specified channels
 @bot.event
