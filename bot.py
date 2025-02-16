@@ -86,6 +86,21 @@ async def change_value(ctx, user: discord.Member, amount: int):
     else:
         await ctx.send(f'User {user.name} does not exist.')
 
+# Command to show a specific user's value to an admin
+@bot.command()
+@commands.has_role('Admin')  # Replace 'Admin' with the required role name
+async def show_value(ctx, user: discord.Member):
+    if ctx.channel.name not in command_channels:
+        await ctx.send(f'Commands are not allowed in this channel.')
+        return
+    user_id = str(user.id)
+    if user_id in user_values:
+        data = user_values[user_id]
+        custom_message = f'{user.name} has {data[value_name]} {value_name}. Last changed: {data["last_changed"]}'
+        await ctx.send(custom_message)
+    else:
+        await ctx.send(f'{user.name} does not have a value yet.')
+
 # Command to delete a user
 @bot.command()
 @commands.has_role('Admin')  # Replace 'Admin' with the required role name
