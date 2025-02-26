@@ -1,0 +1,19 @@
+{
+    "value_name": "Rage coin",
+    "increment_channels": [
+        "💬general💬",
+        "🤗introduce-yourself🤗",
+        "🍕foodies🍰",
+        "🐾pets🐾-🌁sightseeing🎑",
+        "🎨art-and-music🎵",
+        "😂memes😂",
+        "💀hardcore-memes💀"
+    ],
+    "command_channels": [
+        "command",
+        "bot-commands"
+    ],
+    "admin_role": "Officer",
+    "super_admin_role": "Bot Admin",
+    "custom_message": "Congratulations! You have {value} <:rage_coin:1343593905664426004> {value_name}."
+}
