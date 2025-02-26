@@ -43,6 +43,26 @@ try:
 except FileNotFoundError:
     pass
 
+# Dictionary to store Easter eggs
+easter_eggs = []
+
+# Load Easter eggs from a JSON file (if it exists)
+try:
+    with open('easter_eggs.json', 'r') as file:
+        easter_eggs = json.load(file)
+except FileNotFoundError:
+    pass
+
+# Save Easter eggs to a JSON file
+def save_easter_eggs():
+    with open('easter_eggs.json', 'w') as file:
+        json.dump(easter_eggs, file)
+
+# Save user values to a JSON file
+def save_user_values():
+    with open('user_values.json', 'w') as file:
+        json.dump(user_values, file)
+
 # Save configuration to a JSON file
 def save_config():
     global config
@@ -95,6 +115,40 @@ async def add_user(ctx, user: discord.Member):
         print(f'User {user.display_name} added with a base {value_name} of 0.')
     else:
         await ctx.send(f'User {user.display_name} already exists.')
+
+# Command to add an Easter egg
+@bot.command()
+@is_admin_or_super_admin()
+async def add_easter_egg(ctx, *, egg: str):
+    easter_eggs.append(egg)
+    save_easter_eggs()
+    await ctx.send(f'Easter egg added: {egg}')
+    print(f'Easter egg added: {egg}')
+
+# Command to delete an Easter egg
+@bot.command()
+@is_admin_or_super_admin()
+async def delete_easter_eg(ctx, *, egg: str):
+    if egg in easter_eggs:
+        easter_eggs.remove(egg)
+        save_easter_eggs()
+        await ctx.send(f'Easter egg deleted: {egg}')
+        print(f'Easter egg deleted: {egg}')
+    else:
+        await ctx.send(f'Easter egg not found: {egg}')
+
+@bot.command()
+async def show_easter_egg(ctx):
+    if easter_eggs:
+        egg = random.choice(easter_eggs)
+        try:
+            await ctx.author.send(f'Here is your Easter egg: {egg}')
+            await ctx.send('I have sent you a DM with an Easter egg.')
+            print('Easter egg sent via DM.')
+        except discord.Forbidden:
+            await ctx.send('I could not send you a DM. Please check your privacy settings.')
+    else:
+        await ctx.send('There are no Easter eggs available.')
 
 # Command to change a user's value
 @bot.command()
@@ -315,6 +369,7 @@ async def custom_help(ctx):
         embed.add_field(name="!change_value", value="Change a user's value", inline=False)
         embed.add_field(name="!delete_user", value="Delete a user", inline=False)
         embed.add_field(name="!change_name", value="Change a user's name", inline=False)
+        embed.add_field(name="!show_all", value="Show all users' values", inline=False)
         embed.add_field(name="!show_value", value="Show a specific user's value", inline=False)
         embed.add_field(name="!set_custom_message", value="Set the custom message for showing values", inline=False)
     elif has_role(ctx, admin_role):
@@ -322,6 +377,7 @@ async def custom_help(ctx):
         embed.add_field(name="!change_value", value="Change a user's value", inline=False)
         embed.add_field(name="!delete_user", value="Delete a user", inline=False)
         embed.add_field(name="!change_name", value="Change a user's name", inline=False)
+        embed.add_field(name="!show_all", value="Show all users' values", inline=False)
         embed.add_field(name="!show_value", value="Show a specific user's value", inline=False)
     embed.add_field(name="!myvalue", value="Show your value", inline=False)
     
